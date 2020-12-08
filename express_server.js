@@ -30,7 +30,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 app.post("/urls/", (req, res) => {
@@ -42,6 +42,8 @@ app.post("/urls/", (req, res) => {
 
 });
 app.get("/u/:shortURL", (req, res) => {
+  console.log(req.params);
+  console.log(req.body);
   const shortURL = req.params.shortURL;
   if (!Object.prototype.hasOwnProperty.call(urlDatabase,shortURL)) {
     res.status(404);
@@ -57,6 +59,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[shortURL];
   res.redirect('/urls/');
 
+});
+app.post("/urls/:shortURL/Update", (req, res) => {
+  console.log(req.params);
+  console.log(req.body);
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect('/urls/');
 });
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

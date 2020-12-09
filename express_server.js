@@ -42,6 +42,15 @@ const isEmailExist = function(obj, email){
   }
   return false;
 }
+const idByEmail = function(obj, email){
+  const keys = Object.keys(obj);
+  for (let k of keys){
+    if (obj[k]['email'] === email){
+      return k;
+    }
+  }
+  return null;
+}
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -70,6 +79,11 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = { user: users[req.cookies['userID']]};
   res.render("urls_register", templateVars);
+});
+//show the login page
+app.get("/login", (req, res) => {
+  const templateVars = { user: users[req.cookies['userID']]};
+  res.render("urls_login", templateVars);
 });
 //create new url
 app.post("/urls", (req, res) => {
@@ -103,18 +117,15 @@ app.post("/urls/:shortURL/Update", (req, res) => {
 //login bu a username
 app.post("/login", (req, res) => {
   let user = null;
-  for (let id in users) {
-      if (users[id].email === req.body.email && users[id].password === req.body.password) {
+  let id = idByEmail(users, req.body.email);
+  if(!isEmailExist(users,req.body.email) || users[id].password !== req.body.password) {
+    res.status(403);
+    res.send("<h2> Email Doesn't exist or wrong password</h2>");
+  } else if (users[id].email === req.body.email && users[id].password === req.body.password) {
           user = users[id];
-      }
+          res.cookie('userID', user.id);
+          res.redirect('/urls');
   }
-  /*if (user) {
-    res.cookie('userID', user.id);
-    //req.session.user_id = user.id;
-    res.redirect('/urls');
-}*/if (!user) {
-    res.send(' <h2>LOGIN FAIL :( </h2>');
-}
 });
 //logout by clearing the cookies
 app.post("/logout", (req, res) => {

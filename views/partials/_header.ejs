@@ -5,14 +5,29 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-<% if (!username) { %>
-  <label>Enter your name : </label>
+<% if (!user) { %>
+
+  <table>
+    <thead>
   <form class="form-inline" action="/login" method="POST">
-    <input class="form-control" type="text" name="username" style="width: 300px; margin: 1em">
-    <button type="submit" class="btn btn-primary">Submit</button>
+
+      <p>Enter your email : </p>
+    <input class="form-control" type="text" name="email" style="width: 300px; margin: 1em">
+
+    <p>Enter your password : </p>
+    <input class="form-control" type="text" name="password" style="width: 300px; margin: 1em">
+
+    <button type="submit" class="btn btn-primary">Login</button>
     </form>
+    <form class="form-inline" action="/register" method="GET">
+      <button type="register" class="btn btn-primary">Register</button>
+      </form>
+
+  </thead>
+      </table>
+
     <% } else { %>
-      <p class="nav-item nav-link"> Logged in as <%= username %></p>
+      <p class="nav-item nav-link"> Logged in as <%= user["email"] %></p>
       <form class="form-inline" action="/logout" method="POST">
         <button type="submit" class="btn btn-primary">Logout</button>
         </form>

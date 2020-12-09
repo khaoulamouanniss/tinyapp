@@ -13,6 +13,9 @@
     </form>
     <% } else { %>
       <p class="nav-item nav-link"> Logged in as <%= username %></p>
+      <form class="form-inline" action="/logout" method="POST">
+        <button type="submit" class="btn btn-primary">Logout</button>
+        </form>
       <% } %>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">

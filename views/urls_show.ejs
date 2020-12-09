@@ -8,6 +8,7 @@
 
 <body>
   <%- include('partials/_header') %>
+  <%if (user && user['id'] === userID) {%>
   <div class="card text-center">
     <div class="card-header"></div>
     <div class="card-body">
@@ -25,7 +26,11 @@
         </form>
 
       </div>
-
+      <% } else if (user['id'] !== userID) { %>
+        <h2> You don't have permission to show this URL</h2>
+        <% } else { %>
+        <h2> You should login or register first</h2>
+          <% } %>
     <div class="card-footer text-muted"></div>
   </div>
   <!-- Bootstrap JS -->

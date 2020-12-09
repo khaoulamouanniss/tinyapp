@@ -18,6 +18,7 @@
 
     </main>
       <tbody>
+        <%if (user) {%>
         <table class="table">
           <thead>
             <tr>
@@ -27,6 +28,7 @@
               <th scope="col">Delete</th>
             </tr>
             <% for(let url in urls) { %>
+              <%if (urls[url]['userID'] === user['id']) {%>
             <tr>
               <th scope="col"><%= url %></th>
               <th scope="col"><%= urls[url]['longURL'] %></th>
@@ -45,9 +47,13 @@
                 </form>
               </th>
             </tr>
+            <% } %>
           <% } %>
         </thead>
         </table>
+        <% } else { %>
+          <h2> You should login or register first</h2>
+          <% } %>
       </tbody>
     </table>
   </main>

@@ -11,17 +11,17 @@ const generateRandomString = function() {
   return Math.random().toString(36).substr(2, 6);
 };
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "398re4"},
+  "9sm5xK": {longURL: "http://www.google.com", userID: "4ur456"}
 };
 const users = {
-  "user398re4": {
-    id: "user398re4",
+  "398re4": {
+    id: "398re4",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "123"
   },
- "user4ur456": {
-    id: "user4ur456",
+ "4ur456": {
+    id: "4ur456",
     email: "user2@example.com",
     password: "dishwasher-funk"
   }
@@ -30,7 +30,7 @@ const users = {
 //function to add a new user
 const addUser = function (obj, id, email, password){
   obj[id] = {"id": id, 'email': email, 'password': password};
-}
+};
 
 //function to check if an email already exists in users
 const isEmailExist = function(obj, email){
@@ -41,7 +41,9 @@ const isEmailExist = function(obj, email){
     }
   }
   return false;
-}
+};
+
+//function that returns the id of user knowing his email
 const idByEmail = function(obj, email){
   const keys = Object.keys(obj);
   for (let k of keys){
@@ -50,7 +52,7 @@ const idByEmail = function(obj, email){
     }
   }
   return null;
-}
+};
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -67,12 +69,16 @@ app.get("/urls", (req, res) => {
 });
 //show the page for creating new url
 app.get("/urls/new", (req, res) => {
+  if(!req.cookies['userID']) {
+    res.redirect("/login")
+  } else {
   const templateVars = { user: users[req.cookies['userID']]};
   res.render("urls_new",templateVars);
+  }
 });
 //show a specific url
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { user: users[req.cookies['userID']], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { user: users[req.cookies['userID']], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'] };
   res.render("urls_show", templateVars);
 });
 //show the registration form
@@ -98,7 +104,7 @@ app.get("/u/:shortURL", (req, res) => {
     res.status(404);
     res.send("404 NOT FOUND");
   } else {
-    const longURL = urlDatabase[shortURL];
+    const longURL = urlDatabase[shortURL]['longURL'];
     res.redirect(longURL);
   }
 });
@@ -114,7 +120,7 @@ app.post("/urls/:shortURL/Update", (req, res) => {
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect('/urls/');
 });
-//login bu a username
+//login by an email
 app.post("/login", (req, res) => {
   let user = null;
   let id = idByEmail(users, req.body.email);

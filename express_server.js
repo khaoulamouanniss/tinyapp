@@ -5,6 +5,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
+const methodOverride = require('method-override');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
@@ -12,14 +13,15 @@ app.use(cookieSession({
   keys: ['key1']
 }));
 app.set("view engine", "ejs");
+app.use(methodOverride('_method'));
 
-// Our URLs database
+// URLs database
 const urlDatabase = {
-  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "398re4"},
-  "9sm5xK": {longURL: "http://www.google.com", userID: "4ur456"}
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "398re4", countVisits: 1, visitors: [], visits:{"oi567t": {id: "oi567t", date: "11/10/2020 20:18 GMT"}}},
+  "9sm5xK": {longURL: "http://www.google.com", userID: "4ur456", countVisits: 2, visitors: [], visits:{}}
 };
 
-// Our users database
+// users database
 const users = {
   "398re4": {
     id: "398re4",
@@ -32,7 +34,6 @@ const users = {
     password: bcrypt.hashSync("dishwasher-funk", 10)
   }
 };
-
 
 
 app.get("/", (req, res) => {
@@ -61,7 +62,15 @@ app.get("/urls/new", (req, res) => {
 
 //show a specific url
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { user: users[req.session.userID], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'], userID:  urlDatabase[req.params.shortURL]['userID']  };
+  const shortURL = req.params.shortURL;
+  const visitID = generateRandomString();
+  let today = new Date();
+  urlDatabase[shortURL]['countVisits'] ++;
+  if (!urlDatabase[shortURL]['visitors'].includes(req.session.userID)) {
+    urlDatabase[shortURL]['visitors'].push(req.session.userID);
+  }
+  urlDatabase[shortURL]['visits'][visitID] = {'id': visitID, 'date': today.getMonth() + "/" + today.getDate() + "/" + today.getFullYear() + "  " + today.getHours() + ":" + today.getMinutes() + " GMT"};
+  const templateVars = { user: users[req.session.userID], shortURL: shortURL, longURL: urlDatabase[shortURL]['longURL'], userID:  urlDatabase[shortURL]['userID'], countVisits: urlDatabase[shortURL]['countVisits'], visitors: urlDatabase[shortURL]['visitors'].length, visits: urlDatabase[shortURL]['visits']};
   res.render("urls_show", templateVars);
 });
 
@@ -81,7 +90,11 @@ app.get("/login", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[shortURL] = {'longURL': longURL, 'userID': req.session.userID};
+  const visitID = generateRandomString();
+  const today = new Date();
+  urlDatabase[shortURL] = {'longURL': longURL, 'userID': req.session.userID, 'countVisits': 1, visitors: [], visits: {}};
+  urlDatabase[shortURL]['visitors'].push(req.session.userID);
+  urlDatabase[shortURL]['visits'][visitID] = {'id': visitID, 'date': today.getMonth() + "/" + today.getDate() + "/" + today.getFullYear() + "  " + today.getHours() + ":" + today.getMinutes() + " GMT"};
   res.redirect('/urls');
 });
 
@@ -98,12 +111,13 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 //delete a url
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
+
   const id = req.session.userID;
   const shortURL = req.params.shortURL;
   const URLs = urlsForUser(urlDatabase, id);
   if (URLs.includes(shortURL)) {
-    delete urlDatabase[shortURL];
+    delete URLs[shortURL];
     res.redirect('/urls/');
   } else {
     res.status(403);
@@ -112,7 +126,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 //update a url
-app.post("/urls/:shortURL/Update", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
   const id = req.session.userID;
   const shortURL = req.params.shortURL;
   const URLs = urlsForUser(urlDatabase, id);

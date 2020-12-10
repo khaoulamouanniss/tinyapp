@@ -14,10 +14,28 @@
     <div class="card-body">
       <h5 class="card-title">TinyURL for: <%= longURL %></h5>
       <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
+      <p class="card-text">Visited: <%= countVisits %> times</a></p>
+      <p class="card-text">Visited: <%= visitors %> times bu unique visitors</a></p>
+      <br
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Visitor ID</th>
+            <th scope="col">Date</th>
+          </tr>
+          <% for(let v in visits) { %>
+          <tr>
+            <th scope="col"><%= visits[v]['id'] %></th>
+            <th scope="col"><%= visits[v]['date'] %></th>
+          </tr>
+        <% } %>
+    </table>
     </div>
-    <div>
+
+
+    <div class="card-body">
         <label for="longURL">Enter the new URL:</label>
-        <form class="form-inline" action="/urls/<%= shortURL %>/Update" method="POST">
+        <form class="form-inline" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
           <input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 300px; margin: 1em">
         </div>
           <div class="form-group mb-2">

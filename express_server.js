@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookies = require('cookie-parser');
+const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookies());
@@ -166,11 +167,14 @@ app.post("/urls/:shortURL/Update", (req, res) => {
 //login by an email
 app.post("/login", (req, res) => {
   let user = null;
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   let id = idByEmail(users, req.body.email);
-  if (!isEmailExist(users,req.body.email) || users[id].password !== req.body.password) {
+  if (!isEmailExist(users,req.body.email) || !bcrypt.compareSync(users[id].password, hashedPassword)) {
     res.status(403);
     res.send("<h2> Email Doesn't exist or wrong password</h2>");
-  } else if (users[id].email === req.body.email && users[id].password === req.body.password) {
+  } else if (users[id].email === req.body.email && bcrypt.compareSync(users[id].password, hashedPassword)) {
     user = users[id];
     res.cookie('userID', user.id);
     res.redirect('/urls');
@@ -188,6 +192,8 @@ app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   if (email === "" || password === "" || isEmailExist(users, email)) {
     res.status(404);
     res.send("404 NOT FOUND");
